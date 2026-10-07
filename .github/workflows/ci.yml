@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-and-demo:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+
+      - name: Lint
+        run: ruff check .
+
+      - name: Run automated tests
+        run: python -m pytest --cov=cyberquality --cov-report=term-missing
+
+      - name: Start deterministic demo target
+        run: |
+          python demo/demo_server.py > demo.log 2>&1 &
+          echo $! > demo.pid
+          sleep 2
+
+      - name: Generate demonstration reports
+        run: |
+          mkdir -p ci_artifacts
+          python main.py scan --url http://127.0.0.1:8765/insecure --output ci_artifacts/insecure
+          python main.py scan --url http://127.0.0.1:8765/secure --output ci_artifacts/secure
+
+      - name: Upload generated reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: cyberquality-demo-reports
+          path: |
+            ci_artifacts/*.json
+            ci_artifacts/*.pdf
+            demo.log
