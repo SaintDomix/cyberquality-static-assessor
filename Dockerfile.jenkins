@@ -1,0 +1,7 @@
+# LOCAL TEACHING LAB ONLY. Docker socket grants powerful host access.
+FROM jenkins/jenkins:lts-jdk21
+USER root
+RUN apt-get update && apt-get install -y --no-install-recommends docker.io ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+# Root is used only to reach the local host Docker socket in this disposable lab.
+USER root
