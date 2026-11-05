@@ -1,0 +1,17 @@
+**/__pycache__/
+**/*.py[cod]
+.git/
+.github/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.coverage*
+htmlcov/
+sample_reports/
+docs/
+*.pdf
+*.zip
+.env
+.env.*
+!requirements.txt
